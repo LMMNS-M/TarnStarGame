@@ -1,7 +1,7 @@
 import { SOUNDS } from './assets.js';
 export class AudioManager {
  constructor(){this.context=null;this.buffers=new Map();this.sources=new Set();this.muted=false;this.lastShot=-1;this.data=new Map();}
- async preload(){await Promise.all(Object.entries(SOUNDS).map(async([name,url])=>{try{const r=await fetch(url);if(!r.ok)throw Error(url);this.data.set(name,await r.arrayBuffer());}catch(e){console.warn('Audio indisponible',name,e);}}));}
+ async preload(){await Promise.all(Object.entries(SOUNDS).map(async([name,url])=>{try{const r=await fetch(url);if(!r.ok)throw Error(url);this.data.set(name,await r.arrayBuffer());}catch(e){console.warn('Audio unavailable',name,e);}}));}
  unlock(){
   if(!this.context){this.context=new (window.AudioContext||window.webkitAudioContext)();this.gain=this.context.createGain();this.gain.gain.value=this.muted?0:.65;this.gain.connect(this.context.destination);}
   this.context.resume();

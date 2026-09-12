@@ -21,15 +21,16 @@ test('table vide puis premier record à zéro, égalité et reset administrateur
 });
 test('erreur réseau distincte de table vide et sauvegarde refusée',async()=>{
  const board=createLeaderboard({url:'https://tarn.example',key:'public',fetcher:async()=>({ok:false})});
- await assert.rejects(board.read(),/indisponible/);
- await assert.rejects(board.save(1,'Tarn'),/indisponible/);
- await assert.rejects(createLeaderboard({url:'',key:''}).read(),/non configuré/);
+ await assert.rejects(board.read(),/unavailable/);
+ await assert.rejects(board.save(1,'Tarn'),/unavailable/);
+ await assert.rejects(createLeaderboard({url:'',key:''}).read(),/not configured/);
 });
 test('test automatisé isolé et validation des pseudos',async()=>{
  const board=createLeaderboard({memory:true,fetcher:()=>assert.fail('Pas de réseau en mode test')});
  assert.deepEqual(await board.read(),[]);
  await assert.rejects(board.save(0,'   '));
  await assert.rejects(board.save(217,'Tarn'));
+ await assert.rejects(board.save(1,'NicknameTooLong'));
  await board.save(0,' Tarn ');
  assert.deepEqual(await board.read(),[{score:0,nickname:'Tarn'}]);
  assert.deepEqual(await createLeaderboard({memory:true}).read(),[]);

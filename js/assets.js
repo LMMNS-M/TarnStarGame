@@ -87,6 +87,18 @@ export const IMAGES = {
       827
     ]
   },
+  "hbd-tarn": {
+    "src": "assets/images/screens/hbd-tarn.png",
+    "width": 2172,
+    "height": 724,
+    "box": [0, 53, 2140, 724]
+  },
+  "top5-score": {
+    "src": "assets/images/screens/top5-score.png",
+    "width": 1536,
+    "height": 1024,
+    "box": [20, 5, 1514, 996]
+  },
   "gold-star": {
     "src": "assets/images/stars/gold-star.png",
     "width": 722,
@@ -142,28 +154,6 @@ export const IMAGES = {
       583
     ]
   },
-  "continue-normal": {
-    "src": "assets/images/buttons/continue/continue-normal.png",
-    "width": 735,
-    "height": 735,
-    "box": [
-      53,
-      250,
-      680,
-      487
-    ]
-  },
-  "continue-pressed": {
-    "src": "assets/images/buttons/continue/continue-pressed.png",
-    "width": 736,
-    "height": 736,
-    "box": [
-      50,
-      249,
-      680,
-      486
-    ]
-  },
   "replay-normal": {
     "src": "assets/images/buttons/replay/replay-normal.png",
     "width": 707,
@@ -200,7 +190,6 @@ export const IMAGES = {
 };
 export const VIDEO = "assets/video/stars-game-background.mp4";
 export const SOUNDS = {
-  "button-continue": "assets/audio/buttons/button-continue.mp3",
   "button-start": "assets/audio/buttons/button-start.mp3",
   "button-replay": "assets/audio/buttons/button-replay.mp3",
   "combo-activate": "assets/audio/combo/combo-activate.mp3",

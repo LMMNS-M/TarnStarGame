@@ -93,12 +93,8 @@ button:disabled {
 .start-content>[data-art] {
   width:100%
 }
-.start-content h1 {
-  margin:0;
-  font-size:7cqw;
-  text-align:center;
-  color:#fff5bc;
-  text-shadow:0 3px 8px #171a47
+#hbd-logo {
+  width:100%
 }
 .image-button {
   position:relative;
@@ -192,20 +188,21 @@ output {
   color:#fff5bc;
   font-weight:800;
   text-shadow:0 2px 4px #171a47;
-  font-variant-numeric:tabular-nums
+  font-variant-numeric:tabular-nums;
+  line-height:1
 }
 #score {
-  left:31%;
-  top:34%;
-  width:58%;
-  height:43%;
+  left:36%;
+  top:26%;
+  width:48%;
+  height:47%;
   font-size:5.25cqw
 }
 #best-value {
-  left:14%;
-  top:50%;
-  width:71%;
-  height:36%;
+  left:16.5%;
+  top:56.5%;
+  width:66.5%;
+  height:34.5%;
   font-size:4.5cqw
 }
 /* 50% of the previous logo width (92% of 32cqw), independent of WISHES. */
@@ -314,7 +311,7 @@ output {
   display:flex;
   align-items:center;
   flex-direction:column;
-  gap:2.5cqw;
+  gap:1.8cqw;
   transform:translateY(-2cqw)
 }
 #result {
@@ -323,10 +320,10 @@ output {
   animation:pop .5s cubic-bezier(.2,.8,.3,1.15)
 }
 #final-score {
-  left:20%;
-  top:49%;
-  width:59%;
-  height:30%;
+  left:29.2%;
+  top:50.5%;
+  width:43.5%;
+  height:25%;
   font-size:13cqw
 }
 #record {
@@ -341,26 +338,19 @@ output {
   position:relative
 }
 #end-best-value {
-  left:59%;
-  top:16%;
-  width:28%;
-  height:65%;
+  left:61.1%;
+  top:21%;
+  width:29%;
+  height:58%;
   font-size:4.7cqw
 }
 .end-buttons {
   display:flex;
-  gap:4%;
-  width:92%
+  justify-content:center;
+  width:72%
 }
 .end-buttons button {
-  width:48%
-}
-#next-message {
-  font-size:3.5cqw;
-  text-align:center;
-  min-height:2em;
-  margin:0;
-  text-shadow:0 1px 4px #000
+  width:64%
 }
 #resume {
   position:absolute;
@@ -435,14 +425,16 @@ output {
   }
 }
 .best-name {position:absolute;top:100%;left:0;width:100%;text-align:center;font-size:3cqw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff5bc}
-#record-form {pointer-events:auto;width:100%;font-size:3.5cqw;text-align:center}
-#record-form div {display:flex;gap:2cqw;margin-top:2cqw}
-#nickname {min-width:0;width:60%;font:inherit;user-select:text;touch-action:auto}
-#save-score,#retry-leaderboard {border:1px solid #e6d18a;border-radius:8px;background:#101b3b;color:#fff0b1;font:inherit;padding:1.5cqw}
+#record-form {pointer-events:auto;width:86%;font-size:4cqw;text-align:center;font-weight:800;color:#fff5bc;text-shadow:0 2px 4px #171a47}
+#record-form div {display:flex;gap:1.5cqw;margin-top:1.5cqw}
+#nickname {min-width:0;width:58%;height:9cqw;border:2px solid #e6d18a;border-radius:2cqw;background:#fff;color:#101b3b;font-size:4cqw;text-align:center;user-select:text;touch-action:auto}
+#save-score,#retry-leaderboard {border:1px solid #e6d18a;border-radius:2cqw;background:#101b3b;color:#fff0b1;font:inherit;padding:1.5cqw}
+#save-score {width:42%;font-size:3.6cqw;font-weight:800}
 #leaderboard-notice {position:absolute;bottom:0;left:5%;width:90%;text-align:center;font-size:2.8cqw;background:#101b3bed}
 #leaderboard-notice:has(#leaderboard-status:empty) {display:none}
 #retry-leaderboard {margin-left:2cqw}
-#top-five {width:72%;text-align:center;background:#101b3bbd;border:1px solid #e6d18a80;border-radius:2cqw;padding:1.4cqw 3cqw}
-#top-five h2 {margin:0 0 1cqw;font-size:4cqw;color:#fff5bc}
-#top-five ol {list-style:none;margin:0;padding:0;font-size:3cqw;line-height:1.35}
-#top-five p {margin:0;font-size:3cqw;color:#ffffffb8}
+#top-five {width:82%;position:relative}
+#top-five>[data-art] {width:100%}
+#top-five ol {position:absolute;left:19%;right:9%;top:25.3%;bottom:10.2%;display:grid;grid-template-rows:repeat(5,1fr);list-style:none;margin:0;padding:0;font-size:3.5cqw;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;text-shadow:0 2px 4px #07102d}
+#top-five li {display:grid;grid-template-columns:79% 21%;align-items:center;min-width:0}
+#top-five span {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}

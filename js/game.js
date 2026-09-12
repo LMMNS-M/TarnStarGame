@@ -4,8 +4,11 @@ import {createTimeline,Score} from './timeline.js';
 import {AudioManager} from './audio.js';
 import {createLeaderboard,isRecord,qualifiesForTop} from './leaderboard.js';
 const $=id=>document.getElementById(id);
-const leaderboard=createLeaderboard({memory:new URLSearchParams(location.search).has('test')});
-let leaderboardRecords=[],bestRecord=null,leaderboardReady=false,saving=false;
+const params=new URLSearchParams(location.search),testMode=params.has('test');
+const testRecords=params.get('test')==='full'?[216,215,214,213,212].map((score,index)=>({score,nickname:`Player${index+1}`})):[];
+const leaderboard=createLeaderboard({memory:testMode,records:testRecords});
+const NICKNAME_KEY='tarn-star-nickname';
+let leaderboardRecords=[],bestRecord=null,leaderboardReady=false,saving=false,scorePending=false,scoreSubmitted=false;
 export function art(name){
  const a=IMAGES[name],el=document.createElement('div');el.className='art';const [x,y,r,b]=a.box,w=r-x,h=b-y;
  el.style.aspectRatio=`${w}/${h}`;const img=new Image();img.src=a.src;img.alt='';img.draggable=false;
@@ -31,21 +34,26 @@ function bindButton(id,normal,pressed,sound,action){
 function renderBest(){
  best=bestRecord?.score??0;
  for(const id of ['best-value','end-best-value'])$(id).textContent=best;
- for(const id of ['best-name','end-best-name']){$(id).textContent=bestRecord?.nickname??'';$(id).hidden=!bestRecord?.nickname;}
+ $('best-name').textContent=bestRecord?.nickname??'';$('best-name').hidden=!bestRecord?.nickname;
  const list=$('top-five-list');list.replaceChildren();
- leaderboardRecords.forEach((entry,index)=>{const item=document.createElement('li');item.textContent=`${index+1}. ${entry.nickname} — ${entry.score}`;list.append(item);});
- $('top-five-empty').hidden=leaderboardRecords.length>0;
+ for(let index=0;index<5;index++){
+  const entry=leaderboardRecords[index],item=document.createElement('li'),name=document.createElement('span'),value=document.createElement('span');
+  name.className='top-name';value.className='top-score';name.textContent=entry?.nickname??'';value.textContent=entry?String(entry.score):'';item.append(name,value);list.append(item);
+ }
 }
 async function refreshBest(){
  try{leaderboardRecords=await leaderboard.read();bestRecord=leaderboardRecords[0]??null;leaderboardReady=true;renderBest();$('leaderboard-status').textContent='';return true;}
  catch(error){leaderboardReady=false;$('leaderboard-status').textContent=error.message;return false;}
 }
 function syncScore(){$('score').textContent=score.value;renderBest();}
+function readNickname(){try{return (localStorage.getItem(NICKNAME_KEY)??'').slice(0,12);}catch{return '';}}
+function rememberNickname(nickname){try{localStorage.setItem(NICKNAME_KEY,nickname);}catch{}}
+function setScorePending(pending){scorePending=pending;$('record-form').hidden=!pending;$('replay').disabled=pending;}
+$('nickname').value=readNickname();
 $('record-form').addEventListener('submit',async event=>{
  event.preventDefault();if(saving)return;saving=true;$('save-score').disabled=true;
  try{
-  await leaderboard.save(score.value,$('nickname').value);
-  $('record-form').hidden=true;
+  const nickname=$('nickname').value.trim();await leaderboard.save(score.value,nickname);rememberNickname(nickname);scoreSubmitted=true;setScorePending(false);
   await refreshBest();
  }catch(error){$('leaderboard-status').textContent=error.message;}
  finally{saving=false;$('save-score').disabled=false;}
@@ -53,38 +61,27 @@ $('record-form').addEventListener('submit',async event=>{
 $('retry-leaderboard').addEventListener('click',async()=>{
  if(await refreshBest()){
   if(state==='result'){
-   $('record-form').hidden=!qualifiesForTop(score.value,leaderboardRecords);
+   setScorePending(!scoreSubmitted&&qualifiesForTop(score.value,leaderboardRecords));
   }
  }
 });
 function comboBreak(){audio.play('combo-break');$('combo').className='leave';effects.push({until:performance.now()+180,done:()=>{$('combo').hidden=!score.combo;}});}
 function reset(){
- $('record-form').hidden=true;$('nickname').value='';run++;audio.stop();active.clear();effects=[];$('playfield').replaceChildren();score=new Score();timeline=createTimeline();cursor=0;hurry=false;lastCount=-1;recordShown=false;newRecord=false;
+ scoreSubmitted=false;setScorePending(false);$('nickname').value=readNickname();run++;audio.stop();active.clear();effects=[];$('playfield').replaceChildren();score=new Score();timeline=createTimeline();cursor=0;hurry=false;lastCount=-1;recordShown=false;newRecord=false;
  for(const id of ['end-screen','record','announcement','countdown','combo','resume'])$(id).hidden=true;
- $('combo').className='';$('timer').classList.remove('urgent');$('time-fill').style.transform='scaleX(1)';$('next-message').textContent='';syncScore();
+ $('combo').className='';$('timer').classList.remove('urgent');$('time-fill').style.transform='scaleX(1)';syncScore();
 }
 async function start(sound){
  if(saving)return;
  reset();state='starting';$('loading').textContent='';
  // Both media activation calls originate in the button gesture, before awaiting anything.
  const decoded=audio.unlock();video.currentTime=0;video.muted=audio.muted;const play=video.play();
- try{await Promise.all([decoded,play]);}catch{state='ready';video.pause();$('loading').textContent='Touchez START pour autoriser la vidéo et le son.';return;}
+ try{await Promise.all([decoded,play]);}catch{state='ready';video.pause();$('loading').textContent='Tap START to allow video and sound.';return;}
  audio.play(sound);epoch=performance.now();goAt=epoch+3000;state='countdown';$('start-screen').hidden=true;$('veil').classList.add('clear');$('hud').hidden=false;$('timer').hidden=false;$('sound').hidden=false;
 }
 bindButton('start','start-game-normal','start-game-pressed','button-start',start);
 bindButton('replay','replay-normal','replay-pressed','button-replay',start);
-bindButton('next','continue-normal','continue-pressed','button-continue',async sound=>{await audio.unlock();audio.play(sound);onNext();});
-export function onNext(){
- // Set NEXT_URL in config.js, or listen for this event in the host project.
- const result={score:score.value,best,attempts:run,replays:Math.max(0,run-1)};
- if(typeof window.onStarsGameComplete==='function')window.onStarsGameComplete(result);
- window.dispatchEvent(new CustomEvent('stars-game-complete',{detail:result}));
- const event=new CustomEvent('tarn:next',{detail:result,cancelable:true});
- if(!window.dispatchEvent(event))return;
- if(C.NEXT_URL)window.location.assign(C.NEXT_URL);
- else $('next-message').textContent='À suivre… ✨ Vous pouvez rejouer pour remplir encore plus de souhaits.';
-}
-$('sound').addEventListener('click',()=>{audio.mute(!audio.muted);video.muted=audio.muted;$('sound').textContent=audio.muted?'♪̸':'♪';$('sound').setAttribute('aria-label',audio.muted?'Activer le son':'Couper le son');});
+$('sound').addEventListener('click',()=>{audio.mute(!audio.muted);video.muted=audio.muted;$('sound').textContent=audio.muted?'♪̸':'♪';$('sound').setAttribute('aria-label',audio.muted?'Unmute sound':'Mute sound');});
 function count(n){$('countdown').hidden=false;$('countdown').textContent=n===3?'GO!':String(3-n);$('countdown').className='';void $('countdown').offsetWidth;$('countdown').className='pop';audio.play(n===3?'countown-go':'countdown-beep');}
 function warning(event){const node=document.createElement('div');node.className='warning';node.style.left=`${event.x*100}%`;$('playfield').append(node);active.set(event.id,{event,node,falling:false});}
 function fall(item){item.node.remove();const node=document.createElement('div');node.className=`star ${item.event.type}`;node.dataset.id=item.event.id;node.append(art(`${item.event.type}-star`));$('playfield').append(node);item.node=node;item.falling=true;audio.shooting();}
@@ -103,7 +100,7 @@ $('playfield').addEventListener('pointerdown',event=>{
  const node=event.target.closest('.star');if(!node)return;const item=active.get(Number(node.dataset.id));if(item)catchStar(item,performance.now());
 });
 function announce(kind){$('announcement').replaceChildren(art(kind==='hurry'?'hurry-up':'time-up'));$('announcement').className='';$('announcement').setAttribute('aria-label',kind==='hurry'?'HURRY UP!':'TIME UP!');$('announcement').hidden=false;}
-function finish(){state='ending';endAt=goAt+C.GAME_DURATION*1000;for(const item of active.values())item.node.remove();active.clear();$('countdown').hidden=true;$('time-fill').style.transform='scaleX(0)';announce('time');audio.play('time-up');newRecord=leaderboardReady&&isRecord(score.value,bestRecord);if(leaderboardReady&&qualifiesForTop(score.value,leaderboardRecords))$('record-form').hidden=false;}
+function finish(){state='ending';endAt=goAt+C.GAME_DURATION*1000;for(const item of active.values())item.node.remove();active.clear();$('countdown').hidden=true;$('time-fill').style.transform='scaleX(0)';announce('time');audio.play('time-up');newRecord=leaderboardReady&&isRecord(score.value,bestRecord);setScorePending(leaderboardReady&&qualifiesForTop(score.value,leaderboardRecords));}
 function showResult(){state='result';$('hud').hidden=true;$('timer').hidden=true;$('announcement').hidden=true;$('final-score').textContent=score.value;$('end-best-value').textContent=best;$('end-screen').hidden=false;audio.play('end-screen');}
 function tick(now){
  effects=effects.filter(e=>{if(now>=e.until){e.done();return false;}return true;});
@@ -136,9 +133,9 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){audio.cont
 }});
 $('resume').addEventListener('click',()=>{audio.unlock();video.play().then(()=>{$('resume').hidden=true;}).catch(()=>{});});
 async function init(){
- const images=Object.values(IMAGES).map(a=>new Promise(resolve=>{const img=new Image();img.onload=resolve;img.onerror=()=>{$('loading').textContent='Image indisponible : '+a.src;resolve();};img.src=a.src;}));
+ const images=Object.values(IMAGES).map(a=>new Promise(resolve=>{const img=new Image();img.onload=resolve;img.onerror=()=>{$('loading').textContent='Image unavailable: '+a.src;resolve();};img.src=a.src;}));
  const ready=new Promise(resolve=>{if(video.readyState>=2)resolve();else video.addEventListener('loadeddata',resolve,{once:true});});
- video.addEventListener('error',()=>{$('loading').textContent='Vidéo indisponible. Ouvrez le jeu via le serveur local indiqué dans README.';});
+ video.addEventListener('error',()=>{$('loading').textContent='Video unavailable. Open the game through the local server described in README.';});
  await Promise.all([ready,audio.preload(),refreshBest(),...images]);video.pause();state='ready';$('loading').textContent='';$('start').disabled=false;
 }
 requestAnimationFrame(tick);init();

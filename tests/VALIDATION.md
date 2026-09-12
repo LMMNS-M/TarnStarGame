@@ -9,7 +9,7 @@
 - Au moins trois dorées dans la phase finale ; dernier impact avant 60 secondes.
 - Espacement horizontal contrôlé entre toutes les étoiles dont les chutes se chevauchent.
 - Score normal, activation après trois positives, bonus x2, rouge touchée, rouge évitée, positive ratée.
-- Chemins des 18 PNG, 19 MP3 et du MP4 vérifiés.
+- Chemins des 20 PNG, 19 MP3 et du MP4 vérifiés.
 
 ## Navigateur
 
@@ -23,7 +23,7 @@ Deux parties complètes validées avec Replay :
 - HURRY UP à 45 secondes ; TIME UP à 60 secondes, observé dans les 200 ms suivants.
 - Aucun élément étoile actif à TIME UP, score figé ; la vidéo est toujours en lecture.
 - Écran final et record conditionnel ; Replay remet à zéro, conserve le record, mélange la séquence.
-- NEXT sans destination affiche le message prévu.
+- TOP 5 comporte toujours cinq lignes et Replay est verrouillé jusqu'à la sauvegarde d'un score qualifié.
 - Aucune erreur JavaScript ni avertissement console pendant les parties.
 
 Métadonnées réellement lues : vidéo 1080 × 1920, durée 70,266666 secondes. Première image affichée avec vidéo en pause avant START.
@@ -51,4 +51,4 @@ Les essais tactiles sont simulés dans le navigateur de bureau. Le ressenti des 
 - Génération des 45 premières secondes laissée inchangée.
 - Les 30 étoiles finales commencent à partir de 45,6 s. Simulation de 10 000 parties : maximum observé de quatre chutes simultanées, aucune paire suivie d'une positive en moins de 0,4 s, aucun groupe de trois positives, aucun débordement après TIME UP.
 - Score rouge plafonné à zéro, y compris lorsqu'elle casse un combo actif.
-- Interface autonome exposée : `startStarsGame()`, `kimiGame.start()`, callback `onStarsGameComplete(result)` et événement `stars-game-complete`. Le résultat comprend score, record, tentatives et replays.
+- Interface autonome exposée : `startStarsGame()` et `tarnStarGame.start()`.

@@ -22,20 +22,20 @@ Si l’onglet est masqué, le temps réel continue de s’écouler ; au retour, 
 
 ## Configuration et intégration
 
-- `js/config.js` : durées, quantités, multiplicateur de hitbox, URL suivante.
+- `js/config.js` : durées, quantités et multiplicateur de hitbox.
 - `js/assets.js` : chemins réels et rectangles de contenu visible des PNG.
 - `js/timeline.js` : séquence et règles de score pures.
 - `js/audio.js` : sons préchargés, AudioContext activé au premier geste, lectures superposées sans limite artificielle.
-- `js/game.js` : horloge unique, vidéo, UI, étoiles, Replay et `onNext()`.
+- `js/game.js` : horloge unique, vidéo, UI, étoiles, Replay et leaderboard.
 - `css/game.css` : proportions, positionnement, animations et zones tactiles.
 
-Pour NEXT, renseigner `NEXT_URL` dans `js/config.js`. Une application hôte peut lancer le jeu avec `window.startStarsGame()` ou `window.tarnStarGame.start()`. À la validation de NEXT, elle peut définir `window.onStarsGameComplete(result)`, écouter `stars-game-complete`, ou conserver l’événement annulable `tarn:next`. Le résultat contient `{ score, best, attempts, replays }`. Sans destination, un message « À suivre… » s’affiche.
+Une application hôte peut lancer le jeu avec `window.startStarsGame()` ou `window.tarnStarGame.start()`.
 
 Le classement Supabase utilise exclusivement `public.tarn_star_scores`, sans cache localStorage. Configurez les accès propres à TarnStarGame et la table avec [SUPABASE_SETUP.md](SUPABASE_SETUP.md). Ce document contient aussi **RESET TEST SCORES**, la commande de remise à zéro réservée à l’administrateur. Aucun accès ni donnée de KimiGame2 n’est repris.
 
 ## Audit des assets
 
-L’arborescence réelle est `assets/`, `css/`, `js/` en minuscules. 18 PNG, 19 MP3 et une vidéo ont été trouvés. Aucune image ni aucun son d’origine n’a été modifié ou renommé.
+L’arborescence réelle est `assets/`, `css/`, `js/` en minuscules. 20 PNG, 19 MP3 et une vidéo ont été trouvés. Aucune image ni aucun son d’origine n’a été modifié ou renommé.
 
 Correspondances particulières :
 

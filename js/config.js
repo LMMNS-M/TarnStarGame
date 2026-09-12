@@ -1,4 +1,4 @@
-// Réglages principaux. Les quatre phases de timeline.js répartissent le pool de 80 étoiles.
+// Main settings. The four phases in timeline.js distribute the pool of 80 stars.
 export const CONFIG = Object.freeze({
   GAME_DURATION: 60,
   PLAY_AREA_RATIO: 0.75,
@@ -10,5 +10,4 @@ export const CONFIG = Object.freeze({
   HITBOX_SCALE: 1.40,
   COMBO_REQUIRED: 3,
   HURRY_UP_AT: 45,
-  NEXT_URL: '', // Renseigner ici la destination du bouton NEXT.
 });
