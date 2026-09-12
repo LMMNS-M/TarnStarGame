@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#091127"><title>TarnStarGame · Shooting Wishes</title>
+<link rel="icon" href="assets/images/stars/gold-star.png"><link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<main id="game" aria-label="抓住星星 · Shooting Wishes">
+<video id="background" playsinline preload="auto" aria-hidden="true"></video>
+<div id="veil"></div>
+<div id="playfield" aria-label="Attrape les étoiles blanches et dorées, évite les rouges"></div>
+<div id="timer" hidden role="progressbar" aria-label="Temps restant" aria-valuemin="0" aria-valuemax="60"><div id="time-fill"></div></div>
+<button id="sound" aria-label="Couper le son" hidden>♪</button>
+<section id="start-screen" class="screen"><div class="start-content"><h1>Happy Birthday Tarn 🎂🎈</h1><div data-art="rules-frame"></div><button id="start" class="image-button" aria-label="Start Game" disabled></button><p id="loading" role="status">Chargement des étoiles…</p></div></section>
+<div id="countdown" hidden aria-live="polite"></div>
+<div id="announcement" hidden></div>
+<div id="hud" hidden><div id="wishes"><div data-art="wishes-counter-frame"></div><output id="score">0</output><div id="combo" data-art="combo-x2" hidden></div></div><div id="best"><div data-art="best-score-frame"></div><output id="best-value">0</output><span id="best-name" class="best-name" hidden></span></div></div>
+<section id="end-screen" class="screen" hidden aria-label="Résultat"><div class="end-content"><div id="result"><div data-art="result-frame"></div><output id="final-score">0</output><div id="record" data-art="new-best-score" hidden></div></div><div id="end-best"><div data-art="best-score-frame-end"></div><output id="end-best-value">0</output><span id="end-best-name" class="best-name" hidden></span></div><section id="top-five" aria-label="Top 5"><h2>TOP 5</h2><ol id="top-five-list"></ol><p id="top-five-empty">Aucun score</p></section><form id="record-form" hidden><label for="nickname">Score dans le TOP 5 ! Votre pseudo</label><div><input id="nickname" name="nickname" maxlength="24" required autocomplete="nickname"><button id="save-score" type="submit">Enregistrer</button></div></form><div class="end-buttons"><button id="replay" class="image-button" aria-label="Replay"></button><button id="next" class="image-button" aria-label="Next"></button></div><p id="next-message" role="status"></p></div></section>
+<div id="leaderboard-notice"><span id="leaderboard-status" role="status"></span><button id="retry-leaderboard" type="button">Actualiser le classement</button></div><button id="resume" hidden>Toucher pour reprendre ♪</button>
+</main><script type="module" src="js/game.js"></script>
+<script type="module">if(new URLSearchParams(location.search).has("test")) import("./tests/browser-check.js");</script></body></html>
