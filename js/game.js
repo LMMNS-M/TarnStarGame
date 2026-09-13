@@ -2,6 +2,7 @@ import {CONFIG as C} from './config.js';
 import {IMAGES, VIDEO} from './assets.js';
 import {createTimeline,Score} from './timeline.js';
 import {AudioManager} from './audio.js';
+import {loadWithin,optional,seekVideo,prepareVideo} from './loading.js';
 import {createLeaderboard,isRecord,qualifiesForTop} from './leaderboard.js';
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search),testMode=params.has('test');
@@ -21,6 +22,7 @@ $('game').style.setProperty('--hitbox-size',`${11*C.HITBOX_SCALE}cqw`);
 // independently based on 140% of the original 11cqw visual reference.
 $('game').style.setProperty('--visual-ratio',`${87.5*.85/C.HITBOX_SCALE}%`);
 const video=$('background'),audio=new AudioManager();video.src=VIDEO;video.volume=.8;
+const stopPreview=prepareVideo(video);
 let state='loading',score=new Score(),timeline=[],cursor=0,active=new Map(),effects=[],epoch=0,goAt=0,endAt=0,lastCount=-1,hurry=false,newRecord=false,recordShown=false,best=0,run=0,width=0,height=0;
 
 $('best-value').textContent=best;
@@ -75,8 +77,7 @@ async function start(sound){
  if(saving)return;
  reset();state='starting';$('loading').textContent='';
  // Both media activation calls originate in the button gesture, before awaiting anything.
- const decoded=audio.unlock();video.currentTime=0;video.muted=audio.muted;const play=video.play();
- try{await Promise.all([decoded,play]);}catch{state='ready';video.pause();$('loading').textContent='Tap START to allow video and sound.';return;}
+ stopPreview();optional(()=>audio.unlock());seekVideo(video,0);video.muted=audio.muted;optional(()=>video.play());
  audio.play(sound);epoch=performance.now();goAt=epoch+3000;state='countdown';$('start-screen').hidden=true;$('veil').classList.add('clear');$('hud').hidden=false;$('timer').hidden=false;$('sound').hidden=false;
 }
 bindButton('start','start-game-normal','start-game-pressed','button-start',start);
@@ -127,16 +128,22 @@ function tick(now){
  requestAnimationFrame(tick);
 }
 // A backgrounded tab consumes real time, avoiding a paused-clock exploit. Audio is silenced while hidden.
-document.addEventListener('visibilitychange',()=>{if(document.hidden){audio.context?.suspend();video.pause();}else if(['countdown','playing','ending','result'].includes(state)){
- const target=Math.min((performance.now()-epoch)/1000,Number.isFinite(video.duration)?video.duration:Infinity);video.currentTime=target;
- if(target<video.duration)video.play().catch(()=>{$('resume').hidden=false;});audio.context?.resume().catch(()=>{$('resume').hidden=false;});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){optional(()=>audio.context?.suspend());video.pause();}else if(['countdown','playing','ending','result'].includes(state)){
+ const target=Math.min((performance.now()-epoch)/1000,Number.isFinite(video.duration)?video.duration:Infinity);seekVideo(video,target);
+ if(!Number.isFinite(video.duration)||target<video.duration)optional(()=>video.play(),()=>{$('resume').hidden=false;});optional(()=>audio.context?.resume(),()=>{$('resume').hidden=false;});
 }});
-$('resume').addEventListener('click',()=>{audio.unlock();video.play().then(()=>{$('resume').hidden=true;}).catch(()=>{});});
+$('resume').addEventListener('click',()=>{optional(()=>audio.unlock());optional(()=>Promise.resolve(video.play()).then(()=>{$('resume').hidden=true;}));});
 async function init(){
- const images=Object.values(IMAGES).map(a=>new Promise(resolve=>{const img=new Image();img.onload=resolve;img.onerror=()=>{$('loading').textContent='Image unavailable: '+a.src;resolve();};img.src=a.src;}));
- const ready=new Promise(resolve=>{if(video.readyState>=2)resolve();else video.addEventListener('loadeddata',resolve,{once:true});});
- video.addEventListener('error',()=>{$('loading').textContent='Video unavailable. Open the game through the local server described in README.';});
- await Promise.all([ready,audio.preload(),refreshBest(),...images]);video.pause();state='ready';$('loading').textContent='';$('start').disabled=false;
+ // Register the deadline before starting any asynchronous resource work. Video readiness
+ // is deliberately excluded: preload is a hint, especially on iOS and embedded browsers.
+ await loadWithin([
+  ()=>audio.preload(),()=>refreshBest(),
+  ...Object.values(IMAGES).map(a=>()=>new Promise(resolve=>{
+   const img=new Image();img.onload=img.onerror=resolve;img.src=a.src;
+  }))
+ ]);
+ // Late completions never pause media or reset an already running game.
+ if(state==='loading'){state='ready';$('loading').textContent='';$('start').disabled=false;}
 }
 requestAnimationFrame(tick);init();
 // Read-only diagnostics for integration checks, with no way to alter game time or score.
